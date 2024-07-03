@@ -1,0 +1,15 @@
+{
+  "name": "red-book",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "start": "node --trace-warnings app.js"
+  },
+  "keywords": [],
+  "author": "eglereact",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}
