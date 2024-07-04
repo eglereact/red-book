@@ -1,5 +1,9 @@
 import { createContext, useCallback, useEffect, useState } from "react";
 import Page404 from "../Components/Common/Page404";
+import Home from "../Components/Web/Home";
+import Web from "../Components/Web/Parts/Layout";
+import Register from "../Components/Common/Register";
+import Login from "../Components/Common/Login";
 
 const RouterContext = createContext([]);
 
@@ -25,26 +29,13 @@ const Router = ({ children }) => {
     return () => window.removeEventListener("hashchange", handleHashChange);
   }, [handleHashChange]);
 
-  const Home = () => {
-    return (
-      <>
-        <h1>Home page</h1>
-        <div>
-          <a href="/#cat/1">Cat</a>
-          <a href="/#dog/1">Dog</a>
-          <a href="/#">Home</a>
-        </div>
-      </>
-    );
-  };
-
   const Cat = () => {
     return (
       <>
         <h1>Cat page</h1>
         <div>
-          <a href="/#cat/1">Cat</a>
-          <a href="/#dog/1">Dog</a>
+          <a href="/#cat">Cat</a>
+          <a href="/#dog">Dog</a>
           <a href="/#">Home</a>
         </div>
       </>
@@ -56,8 +47,8 @@ const Router = ({ children }) => {
       <>
         <h1>Dog page</h1>
         <div>
-          <a href="/#cat/1">Cat</a>
-          <a href="/#dog/1">Dog</a>
+          <a href="/#cat">Cat</a>
+          <a href="/#dog">Dog</a>
           <a href="/#">Home</a>
         </div>
       </>
@@ -66,9 +57,43 @@ const Router = ({ children }) => {
 
   const routes = [
     { path: "", pc: 0, component: null },
-    { path: "#", pc: 0, component: <Home /> },
-    { path: "#cat", pc: 1, component: <Cat /> },
-    { path: "#dog", pc: 1, component: <Dog /> },
+    {
+      path: "#",
+      pc: 0,
+      component: (
+        <Web>
+          <Home />
+        </Web>
+      ),
+    },
+    {
+      path: "#cat",
+      pc: 0,
+      component: (
+        <Web>
+          <Cat />
+        </Web>
+      ),
+    },
+    {
+      path: "#dog",
+      pc: 0,
+      component: (
+        <Web>
+          <Dog />
+        </Web>
+      ),
+    },
+    {
+      path: "#register",
+      pc: 0,
+      component: <Register />,
+    },
+    {
+      path: "#login",
+      pc: 0,
+      component: <Login />,
+    },
   ];
 
   const routeComponent = routes.find(
