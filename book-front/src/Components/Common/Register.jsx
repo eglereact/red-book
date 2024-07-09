@@ -13,12 +13,16 @@ export default function Register() {
   const { doAction, response } = useServerPost("register");
 
   const [form, setForm] = useState(defaultValues);
+  const [buttonDisabled, setButtonDisabled] = useState(false);
 
   useEffect(() => {
     if (null === response) {
       return;
     }
-    window.location.hash = REDIRECT_AFTER_REGISTER;
+    setButtonDisabled(false);
+    if (response.type === "success") {
+      window.location.hash = REDIRECT_AFTER_REGISTER;
+    }
   }, [response]);
 
   const handleForm = (e) => {
@@ -27,6 +31,7 @@ export default function Register() {
 
   const handleSubmit = () => {
     //TODO validation
+    setButtonDisabled(true);
     doAction({ name: form.name, email: form.email, password: form.password });
   };
 
@@ -91,6 +96,7 @@ export default function Register() {
                               type="button"
                               value="Sign Up"
                               className="primary"
+                              disabled={buttonDisabled}
                               onClick={handleSubmit}
                             />
                           </li>

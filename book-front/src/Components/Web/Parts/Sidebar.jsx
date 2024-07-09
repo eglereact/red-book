@@ -94,13 +94,13 @@ const Sidebar = () => {
         {/* <!-- Footer --> */}
         <Footer />
       </div>
-      <a
+      <span
         style={{ cursor: "pointer" }}
         onClick={() => toggleSidebar()}
         className="toggle"
       >
         Toggle
-      </a>
+      </span>
     </div>
   );
 };
