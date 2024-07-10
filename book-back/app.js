@@ -25,7 +25,7 @@ app.post("/register", (req, res) => {
       .json({
         message: "There are mistakes in form.",
         errors: {
-          errors: "Email is not correct",
+          email: "Email is not correct",
         },
       })
       .end();
@@ -36,6 +36,6 @@ app.post("/register", (req, res) => {
   });
 });
 
-app.listen(port, (_) => {
+app.listen(port, () => {
   console.log(`Books app listening on port ${port}`);
 });

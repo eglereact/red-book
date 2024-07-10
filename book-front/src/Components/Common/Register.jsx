@@ -13,7 +13,7 @@ export default function Register() {
   };
 
   const { doAction, response } = useServerPost("register");
-  const { errors, validate } = useRegister();
+  const { errors, validate, setServerErrors } = useRegister();
 
   const [form, setForm] = useState(defaultValues);
   const [buttonDisabled, setButtonDisabled] = useState(false);
@@ -26,7 +26,10 @@ export default function Register() {
     if (response.type === "success") {
       window.location.hash = REDIRECT_AFTER_REGISTER;
     } else {
-      console.log(response.data.response.data.message);
+      if (response.data?.response?.data?.errors) {
+        console.log(response.data.response.data.errors);
+        setServerErrors(response.data.response.data.errors);
+      }
     }
   }, [response]);
 

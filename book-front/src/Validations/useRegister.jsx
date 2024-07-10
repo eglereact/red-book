@@ -3,6 +3,10 @@ import { useState } from "react";
 const useRegister = () => {
   const [errors, setErrors] = useState({});
 
+  const setServerErrors = (err) => {
+    setErrors(err);
+  };
+
   const validate = (form) => {
     const errorsBag = {};
 
@@ -34,7 +38,7 @@ const useRegister = () => {
     return false;
   };
 
-  return { errors, validate };
+  return { errors, validate, setServerErrors };
 };
 
 export default useRegister;
