@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import useServerPost from "../../Hooks/useServerPost";
 import { REDIRECT_AFTER_REGISTER } from "../../Constants/urls";
+import useRegister from "../../Validations/useRegister";
+import Input from "../Forms/Input";
 
 export default function Register() {
   const defaultValues = {
@@ -11,6 +13,7 @@ export default function Register() {
   };
 
   const { doAction, response } = useServerPost("register");
+  const { errors, validate } = useRegister();
 
   const [form, setForm] = useState(defaultValues);
   const [buttonDisabled, setButtonDisabled] = useState(false);
@@ -22,6 +25,8 @@ export default function Register() {
     setButtonDisabled(false);
     if (response.type === "success") {
       window.location.hash = REDIRECT_AFTER_REGISTER;
+    } else {
+      console.log(response.data.response.data.message);
     }
   }, [response]);
 
@@ -31,6 +36,9 @@ export default function Register() {
 
   const handleSubmit = () => {
     //TODO validation
+    if (!validate(form)) {
+      return;
+    }
     setButtonDisabled(true);
     doAction({ name: form.name, email: form.email, password: form.password });
   };
@@ -50,43 +58,47 @@ export default function Register() {
                         <h1>Sign Up</h1>
                       </div>
                       <div className="col-6 col-12-xsmall">
-                        <input
+                        <Input
                           type="text"
                           name="name"
                           onChange={handleForm}
                           value={form.name}
                           placeholder="Name"
                           autoComplete="username"
+                          errors={errors}
                         />
                       </div>
                       <div className="col-6 col-12-xsmall">
-                        <input
+                        <Input
                           type="email"
                           name="email"
                           onChange={handleForm}
                           value={form.email}
                           placeholder="Email"
                           autoComplete="email"
+                          errors={errors}
                         />
                       </div>
                       <div className="col-6 col-12-xsmall">
-                        <input
+                        <Input
                           type="password"
                           name="password"
                           onChange={handleForm}
                           value={form.password}
                           placeholder="Password"
                           autoComplete="new-password"
+                          errors={errors}
                         />
                       </div>
                       <div className="col-6 col-12-xsmall">
-                        <input
+                        <Input
                           type="password"
                           name="password2"
                           onChange={handleForm}
                           value={form.password2}
                           placeholder="Repeat Password"
                           autoComplete="new-password"
+                          errors={errors}
                         />
                       </div>
                       <div className="col-12">

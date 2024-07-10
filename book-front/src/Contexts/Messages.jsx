@@ -27,6 +27,12 @@ export const Messages = ({ children }) => {
         title: "Server error",
         text: error.message,
       });
+    } else {
+      addMessage({
+        type: "error",
+        title: "Server error " + error.response.status,
+        text: error.response.data.message,
+      });
     }
   }, []);
 

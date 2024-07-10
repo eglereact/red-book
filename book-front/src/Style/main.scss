@@ -70,8 +70,9 @@
 @import "components/mini-posts";
 @import "components/features";
 @import "components/posts";
-@import "components/toast"; // Layout.
-
+@import "components/toast";
+@import "components/errors";
+// Layout.
 @import "layout/wrapper";
 @import "layout/main";
 @import "layout/sidebar";
