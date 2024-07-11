@@ -16,23 +16,65 @@ app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
+const connection = mysql.createConnection({
+  host: "localhost",
+  user: "root",
+  password: "",
+  database: "book",
+});
+
+connection.connect();
+
 app.post("/register", (req, res) => {
-  const { email } = req.body;
+  const { name, email, password } = req.body;
 
   if (!/\S+@\S+\.\S+/.test(email)) {
     res
       .status(422)
       .json({
-        message: "There are mistakes in form.",
-        errors: {
+        message: "Form has errors",
+        errorsBag: {
           email: "Email is not correct",
         },
       })
       .end();
+    return;
   }
 
-  res.status(422).json({
-    message: "Everything is bad.",
+  const sql = `
+    SELECT email
+    FROM users
+    WHERE email = ?
+    `;
+
+  connection.query(sql, [email], (err, rows) => {
+    if (err) throw err;
+    if (rows.length) {
+      res
+        .status(422)
+        .json({
+          message: "Form has errors",
+          errorsBag: {
+            email: "Email already exist",
+          },
+        })
+        .end();
+    } else {
+      const sql = `
+            INSERT INTO users (name, email, password)
+            VALUES ( ?, ?, ? )
+            `;
+      connection.query(sql, [name, email, md5(password)], (err) => {
+        if (err) throw err;
+        res.status(201).json({
+          message: {
+            type: "success",
+            title: `Hello, ${name}`,
+            text: `Successfully register. ${name}`,
+          },
+        }).end;
+      });
+    }
   });
 });
 

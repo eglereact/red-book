@@ -12,26 +12,25 @@ export default function Register() {
     password2: "",
   };
 
-  const { doAction, response } = useServerPost("register");
+  const { doAction, serverResponse } = useServerPost("register");
   const { errors, validate, setServerErrors } = useRegister();
 
   const [form, setForm] = useState(defaultValues);
   const [buttonDisabled, setButtonDisabled] = useState(false);
 
   useEffect(() => {
-    if (null === response) {
+    if (null === serverResponse) {
       return;
     }
     setButtonDisabled(false);
-    if (response.type === "success") {
+    if (serverResponse.type === "success") {
       window.location.hash = REDIRECT_AFTER_REGISTER;
     } else {
-      if (response.data?.response?.data?.errors) {
-        console.log(response.data.response.data.errors);
-        setServerErrors(response.data.response.data.errors);
+      if (serverResponse.serverData?.response?.data?.errorsBag) {
+        setServerErrors(serverResponse.serverData.response.data.errorsBag);
       }
     }
-  }, [response]);
+  }, [serverResponse]);
 
   const handleForm = (e) => {
     setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
