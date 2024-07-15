@@ -7,6 +7,7 @@ import Register from "../Components/Common/Register";
 import Login from "../Components/Common/Login";
 import Dashboard from "../Components/Admin/Dashboard";
 import UsersList from "../Components/Admin/UsersList";
+import * as l from "../Constants/urls";
 
 const RouterContext = createContext([]);
 
@@ -61,7 +62,7 @@ const Router = ({ children }) => {
   const routes = [
     { path: "", pc: 0, component: null },
     {
-      path: "#",
+      path: l.SITE_HOME,
       pc: 0,
       component: (
         <Web>
@@ -88,18 +89,19 @@ const Router = ({ children }) => {
       ),
     },
     {
-      path: "#register",
+      path: l.SITE_REGISTER,
       pc: 0,
       component: <Register />,
     },
     {
-      path: "#login",
+      path: l.SITE_LOGIN,
       pc: 0,
       component: <Login />,
     },
     {
-      path: "#dashboard",
-      pc: 0,
+      path: l.SITE_DASHBOARD,
+      pc: 1,
+      p1: "dashboard",
       component: (
         <Admin>
           <Dashboard />
@@ -107,8 +109,9 @@ const Router = ({ children }) => {
       ),
     },
     {
-      path: "#userslist",
-      pc: 0,
+      path: l.USERS_LIST,
+      pc: 1,
+      p1: "users",
       component: (
         <Admin>
           <UsersList />
@@ -117,9 +120,22 @@ const Router = ({ children }) => {
     },
   ];
 
-  const routeComponent = routes.find(
-    (r) => r.path === route && r.pc === params.length
-  )?.component ?? <Page404 />;
+  const findRoute = (_) => {
+    return routes.find((r) => {
+      const realPath = r.path.split("/");
+      if (realPath.length === 1) {
+        return realPath[0] === route && r.pc === params.length;
+      }
+      if (realPath.length === 2) {
+        return (
+          realPath[0] === route && r.pc === params.length && r.p1 === params[0]
+        );
+      }
+      return false;
+    });
+  };
+
+  const routeComponent = findRoute()?.component ?? <Page404 />;
 
   return (
     <RouterContext.Provider value={params}>

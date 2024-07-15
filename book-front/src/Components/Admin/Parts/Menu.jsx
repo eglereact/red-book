@@ -1,3 +1,5 @@
+import * as l from "../../../Constants/urls";
+
 export default function Menu() {
   return (
     <nav id="menu">
@@ -6,10 +8,10 @@ export default function Menu() {
       </header>
       <ul>
         <li>
-          <a href="/#dashboard">Dashbord</a>
+          <a href={l.SITE_DASHBOARD}>Dashboard</a>
         </li>
         <li>
-          <a href="/#userslist">Users</a>
+          <a href={l.USERS_LIST}>Users</a>
         </li>
       </ul>
     </nav>

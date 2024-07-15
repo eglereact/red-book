@@ -1,3 +1,5 @@
+import * as l from "../../../Constants/urls";
+
 const Header = () => {
   return (
     <header id="header">
@@ -6,13 +8,18 @@ const Header = () => {
       </a>
       <ul className="icons">
         <li>
-          <a href="/#login">
+          <a href={l.SITE_LOGIN}>
             <span className="label">Login</span>
           </a>
         </li>
         <li>
-          <a href="/#register">
+          <a href={l.SITE_REGISTER}>
             <span className="label">Sign Up</span>
+          </a>
+        </li>
+        <li>
+          <a href={l.SITE_DASHBOARD}>
+            <span className="label">ADMIN</span>
           </a>
         </li>
       </ul>

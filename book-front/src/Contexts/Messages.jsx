@@ -20,29 +20,38 @@ export const Messages = ({ children }) => {
     [remMessage]
   );
 
-  const messageError = useCallback((error) => {
-    if (!error.response) {
-      addMessage({
-        type: "error",
-        title: "Server error",
-        text: error.message,
-      });
-    } else {
-      addMessage({
-        type: "error",
-        title: "Server error " + error.response.status,
-        text: error.response.data.message,
-      });
-    }
-  }, []);
+  const messageError = useCallback(
+    (error) => {
+      if (!error.response) {
+        addMessage({
+          type: "error",
+          title: "Server error",
+          text: error.message,
+        });
+      } else {
+        addMessage({
+          type: "error",
+          title: "Server error " + error.response.status,
+          text: error.response.data.message,
+        });
+      }
+    },
+    [addMessage]
+  );
 
-  const messageSuccess = useCallback((res) => {
-    addMessage({
-      type: res.data.message.type,
-      title: res.data.message.title,
-      text: res.data.message.text,
-    });
-  }, []);
+  const messageSuccess = useCallback(
+    (res) => {
+      if (!res.data.message) {
+        return;
+      }
+      addMessage({
+        type: res.data.message.type,
+        title: res.data.message.title,
+        text: res.data.message.text,
+      });
+    },
+    [addMessage]
+  );
 
   return (
     <MessagesContext.Provider
