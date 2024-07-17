@@ -87,6 +87,15 @@ export default function UsersList() {
                       <td className="smaller">
                         <ul className="actions">
                           <li>
+                            <a
+                              href={l.USER_EDIT + "/" + user.id}
+                              type="button"
+                              className="button small"
+                            >
+                              Edit
+                            </a>
+                          </li>
+                          <li>
                             <input
                               type="button"
                               value="Delete"
@@ -99,15 +108,6 @@ export default function UsersList() {
                                 })
                               }
                             />
-                          </li>
-                          <li>
-                            <a
-                              href={l.USER_EDIT + "/" + user.id}
-                              type="button"
-                              className="small"
-                            >
-                              Edit
-                            </a>
                           </li>
                         </ul>
                       </td>

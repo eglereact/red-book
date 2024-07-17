@@ -149,7 +149,7 @@ const Router = ({ children }) => {
   const routeComponent = findRoute()?.component ?? <Page404 />;
 
   return (
-    <RouterContext.Provider value={params}>
+    <RouterContext.Provider value={{ params }}>
       {routeComponent}
     </RouterContext.Provider>
   );
