@@ -8,6 +8,7 @@ import Login from "../Components/Common/Login";
 import Dashboard from "../Components/Admin/Dashboard";
 import UsersList from "../Components/Admin/UsersList";
 import * as l from "../Constants/urls";
+import UserEdit from "../Components/Admin/UserEdit";
 
 const RouterContext = createContext([]);
 
@@ -115,6 +116,16 @@ const Router = ({ children }) => {
       component: (
         <Admin>
           <UsersList />
+        </Admin>
+      ),
+    },
+    {
+      path: l.USER_EDIT,
+      pc: 2,
+      p1: "user-edit",
+      component: (
+        <Admin>
+          <UserEdit />
         </Admin>
       ),
     },

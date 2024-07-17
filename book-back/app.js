@@ -93,6 +93,45 @@ app.post("/register", (req, res) => {
   });
 });
 
+app.delete("/admin/delete/user/:id", (req, res) => {
+  const { id } = req.params;
+
+  setTimeout((_) => {
+    const sql = `
+        DELETE
+        FROM users
+        WHERE id = ? AND role != 'admin'
+        `;
+
+    connection.query(sql, [id], (err, result) => {
+      if (err) throw err;
+      const deleted = result.affectedRows;
+      if (!deleted) {
+        res
+          .status(422)
+          .json({
+            message: {
+              type: "info",
+              title: "Users",
+              text: `User is admin or user do not exist.`,
+            },
+          })
+          .end();
+        return;
+      }
+      res
+        .json({
+          message: {
+            type: "success",
+            title: "Users",
+            text: `User was deleted.`,
+          },
+        })
+        .end();
+    });
+  }, 1500);
+});
+
 app.listen(port, () => {
   console.log(`Books app listening on port ${port}`);
 });

@@ -2,11 +2,17 @@ import { useContext } from "react";
 import { ModalsContext } from "../../Contexts/Modals";
 
 const DeleteModal = () => {
-  const { deleteModal } = useContext(ModalsContext);
+  const { deleteModal, setDeleteModal } = useContext(ModalsContext);
 
   if (deleteModal === null) {
     return null;
   }
+
+  const submit = () => {
+    deleteModal.doDelete(deleteModal.data);
+    deleteModal.hideData(deleteModal.data);
+    setDeleteModal(null);
+  };
 
   return (
     <div className="delete-modal-container">
@@ -15,18 +21,28 @@ const DeleteModal = () => {
           type="button"
           className="simple"
           aria-label="Close"
-          onClick={() => console.log("click")}
+          onClick={() => setDeleteModal(null)}
         >
           <span className="icon solid fa-times"></span>
         </button>
         <div className="content">
-          <h2>Are you sure you want to delete user?</h2>
+          <h2>Are you sure you want to delete {deleteModal.data.name}?</h2>
           <ul className="actions">
             <li>
-              <input type="button" value="Delete" className="small" />
+              <input
+                onClick={submit}
+                type="button"
+                value="Delete"
+                className="small"
+              />
             </li>
             <li>
-              <input type="button" value="Cancel" className="small" />
+              <input
+                type="button"
+                value="Cancel"
+                className="small"
+                onClick={() => setDeleteModal(null)}
+              />
             </li>
           </ul>
         </div>
