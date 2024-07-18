@@ -6,19 +6,22 @@ import { Router } from "./Contexts/Router";
 import "./Style/main.scss";
 import { Loader } from "./Contexts/Loader";
 import LoaderContainer from "./Components/Common/Loader";
+import { Auth } from "./Contexts/Auth";
 
 function App() {
   return (
-    <Messages>
-      <Loader>
-        <Modals>
-          <Msg />
-          <DeleteModal />
-          <LoaderContainer />
-          <Router />
-        </Modals>
-      </Loader>
-    </Messages>
+    <Auth>
+      <Messages>
+        <Loader>
+          <Modals>
+            <Msg />
+            <DeleteModal />
+            <LoaderContainer />
+            <Router />
+          </Modals>
+        </Loader>
+      </Messages>
+    </Auth>
   );
 }
 

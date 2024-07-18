@@ -6,6 +6,7 @@ import * as l from "../../Constants/urls";
 import Input from "../Forms/Input";
 import Select from "../Forms/Select";
 import roles from "../../Constants/roles";
+import { LoaderContext } from "../../Contexts/Loader";
 
 export default function UserEdit() {
   const { params } = useContext(RouterContext);
@@ -15,11 +16,12 @@ export default function UserEdit() {
   const { doAction: doPut, serverResponse: serverPutResponse } = useServerPut(
     l.SERVER_UPDATE_USER
   );
+  const { setShow } = useContext(LoaderContext);
   const [user, setUser] = useState(null);
 
   useEffect(() => {
     doGet("/" + params[1]);
-  }, [doGet]);
+  }, [doGet, params]);
 
   useEffect(() => {
     if (null === serverGetResponse) {
@@ -32,7 +34,7 @@ export default function UserEdit() {
     if (null === serverPutResponse) {
       return;
     }
-    if ("success" == serverPutResponse.type) {
+    if ("success" === serverPutResponse.type) {
       window.location.href = l.USERS_LIST;
     }
   }, [serverPutResponse]);
@@ -43,6 +45,7 @@ export default function UserEdit() {
 
   const submit = () => {
     //TODO Validation
+    setShow(true);
     doPut(user);
   };
 

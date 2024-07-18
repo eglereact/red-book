@@ -4,13 +4,19 @@ const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
 
 const mysql = require("mysql");
-// const { v4: uuidv4 } = require('uuid');
+const { v4: uuidv4 } = require("uuid");
 // const fs = require('node:fs');
 const md5 = require("md5");
 const app = express();
 const port = 3001;
 
-app.use(cors());
+app.use(
+  cors({
+    origin: "http://localhost:3000",
+    credentials: true,
+  })
+);
+
 app.use(cookieParser());
 // app.use(express.static('public'));
 app.use(bodyParser.json());
@@ -37,6 +43,58 @@ app.get("/admin/users", (req, res) => {
         users: rows,
       })
       .end();
+  });
+});
+
+app.post("/login", (req, res) => {
+  const { email, password } = req.body;
+  const session = uuidv4();
+
+  const sql = `
+            UPDATE users
+            SET session = ?
+            WHERE email = ? AND password = ?
+        `;
+
+  connection.query(sql, [session, email, md5(password)], (err, result) => {
+    if (err) throw err;
+    const logged = result.affectedRows;
+    if (!logged) {
+      res
+        .status(401)
+        .json({
+          message: {
+            type: "error",
+            title: "Prisijungimas nepavyko",
+            text: `Neteisingi prisijungimo duomenys`,
+          },
+        })
+        .end();
+      return;
+    }
+    const sql = `
+            SELECT id, name, email, role
+            FROM users
+            WHERE email = ? AND password = ?
+        `;
+    connection.query(sql, [email, md5(password)], (err, rows) => {
+      if (err) throw err;
+      res.cookie("book-session", session, {
+        maxAge: 1000 * 60 * 60 * 24,
+        httpOnly: true,
+      });
+      res
+        .json({
+          message: {
+            type: "success",
+            title: `Sveiki, ${rows?.[0]?.name}!`,
+            text: `Jūs sėkmingai prisijungėte`,
+          },
+          session,
+          user: rows?.[0],
+        })
+        .end();
+    });
   });
 });
 
