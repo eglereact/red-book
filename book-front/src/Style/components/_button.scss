@@ -99,3 +99,32 @@ button,
     opacity: 0.25;
   }
 }
+
+button.link {
+  @include vendor(
+    "transition",
+    (
+      "color #{_duration(transition)} ease-in-out",
+      "border-bottom-color #{_duration(transition)} ease-in-out"
+    )
+  );
+  border-bottom: dotted 1px;
+  color: _palette(accent);
+  text-decoration: none;
+  box-shadow: none;
+  padding: 0;
+  border-radius: 0;
+  height: auto;
+  line-height: 1.5em;
+  font-size: 0.9em;
+  font-weight: 500;
+
+  &:hover {
+    border-bottom-color: _palette(accent);
+    color: _palette(accent) !important;
+
+    strong {
+      color: inherit;
+    }
+  }
+}

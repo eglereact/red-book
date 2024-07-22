@@ -2,13 +2,21 @@ const express = require("express");
 const cors = require("cors");
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
-
 const mysql = require("mysql");
 const { v4: uuidv4 } = require("uuid");
 // const fs = require('node:fs');
 const md5 = require("md5");
 const app = express();
 const port = 3001;
+
+const connection = mysql.createConnection({
+  host: "localhost",
+  user: "root",
+  password: "",
+  database: "book",
+});
+
+connection.connect();
 
 app.use(
   cors({
@@ -22,142 +30,86 @@ app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
-const connection = mysql.createConnection({
-  host: "localhost",
-  user: "root",
-  password: "",
-  database: "book",
-});
+const checkSession = (req, _, next) => {
+  const session = req.cookies["book-session"];
 
-connection.connect();
-
-app.get("/admin/users", (req, res) => {
+  if (!session) {
+    return next();
+  }
   const sql = `
+        SELECT id, name, email, role 
+        FROM users
+        WHERE session = ?
+    `;
+  connection.query(sql, [session], (err, rows) => {
+    if (err) throw err;
+
+    if (!rows.length) {
+      return next();
+    }
+    req.user = rows[0];
+    next();
+  });
+};
+
+const checkUserIsAuthorized = (req, res, roles) => {
+  if (!req.user) {
+    res
+      .status(401)
+      .json({
+        message: {
+          type: "error",
+          title: "Unauthorized",
+          text: `You must be logged in`,
+        },
+        reason: "not-logged-in",
+      })
+      .end();
+    return false;
+  }
+  if (!roles.includes(req.user.role)) {
+    res
+      .status(401)
+      .json({
+        message: {
+          type: "error",
+          title: "Unauthorized",
+          text: `You are not authorized to perform this operation`,
+        },
+        reason: "not-authorized",
+      })
+      .end();
+    return false;
+  }
+  return true;
+};
+
+app.use(checkSession);
+
+app.get("/admin/users", (_, res) => {
+  setTimeout((_) => {
+    const sql = `
         SELECT *
         FROM users`;
 
-  connection.query(sql, (err, rows) => {
-    if (err) throw err;
-    res
-      .json({
-        users: rows,
-      })
-      .end();
-  });
-});
-
-app.post("/login", (req, res) => {
-  const { email, password } = req.body;
-  const session = uuidv4();
-
-  const sql = `
-            UPDATE users
-            SET session = ?
-            WHERE email = ? AND password = ?
-        `;
-
-  connection.query(sql, [session, email, md5(password)], (err, result) => {
-    if (err) throw err;
-    const logged = result.affectedRows;
-    if (!logged) {
-      res
-        .status(401)
-        .json({
-          message: {
-            type: "error",
-            title: "Prisijungimas nepavyko",
-            text: `Neteisingi prisijungimo duomenys`,
-          },
-        })
-        .end();
-      return;
-    }
-    const sql = `
-            SELECT id, name, email, role
-            FROM users
-            WHERE email = ? AND password = ?
-        `;
-    connection.query(sql, [email, md5(password)], (err, rows) => {
+    connection.query(sql, (err, rows) => {
       if (err) throw err;
-      res.cookie("book-session", session, {
-        maxAge: 1000 * 60 * 60 * 24,
-        httpOnly: true,
-      });
       res
         .json({
-          message: {
-            type: "success",
-            title: `Sveiki, ${rows?.[0]?.name}!`,
-            text: `Jūs sėkmingai prisijungėte`,
-          },
-          session,
-          user: rows?.[0],
+          users: rows,
         })
         .end();
     });
-  });
-});
-
-app.post("/register", (req, res) => {
-  const { name, email, password } = req.body;
-
-  if (!/\S+@\S+\.\S+/.test(email)) {
-    res
-      .status(422)
-      .json({
-        message: "Form has errors",
-        errorsBag: {
-          email: "Email is not correct",
-        },
-      })
-      .end();
-    return;
-  }
-
-  const sql = `
-    SELECT email
-    FROM users
-    WHERE email = ?
-    `;
-
-  connection.query(sql, [email], (err, rows) => {
-    if (err) throw err;
-    if (rows.length) {
-      res
-        .status(422)
-        .json({
-          message: "Form has errors",
-          errorsBag: {
-            email: "Email already exist",
-          },
-        })
-        .end();
-    } else {
-      const sql = `
-            INSERT INTO users (name, email, password)
-            VALUES ( ?, ?, ? )
-            `;
-      connection.query(sql, [name, email, md5(password)], (err) => {
-        if (err) throw err;
-        res.status(201).json({
-          message: {
-            type: "success",
-            title: `Hello, ${name}`,
-            text: `Successfully register. ${name}`,
-          },
-        }).end;
-      });
-    }
-  });
+  }, 1500);
 });
 
 app.delete("/admin/delete/user/:id", (req, res) => {
-  const { id } = req.params;
-
   setTimeout((_) => {
+    const { id } = req.params;
+
     const sql = `
-        DELETE
-        FROM users
+        DELETE 
+        FROM users 
         WHERE id = ? AND role != 'admin'
         `;
 
@@ -171,7 +123,7 @@ app.delete("/admin/delete/user/:id", (req, res) => {
             message: {
               type: "info",
               title: "Users",
-              text: `User is admin or user do not exist.`,
+              text: `The user is an administrator and cannot be deleted or the user does not exist`,
             },
           })
           .end();
@@ -182,7 +134,7 @@ app.delete("/admin/delete/user/:id", (req, res) => {
           message: {
             type: "success",
             title: "Users",
-            text: `User was deleted.`,
+            text: `User deleted successfully`,
           },
         })
         .end();
@@ -192,13 +144,16 @@ app.delete("/admin/delete/user/:id", (req, res) => {
 
 app.get("/admin/edit/user/:id", (req, res) => {
   setTimeout((_) => {
+    if (!checkUserIsAuthorized(req, res, ["admin"])) {
+      return;
+    }
+
     const { id } = req.params;
     const sql = `
-       SELECT id, name, email, role
-       FROM users 
-       WHERE id = ?
+        SELECT id, name, email, role
+        FROM users
+        WHERE id = ?
         `;
-
     connection.query(sql, [id], (err, rows) => {
       if (err) throw err;
       if (!rows.length) {
@@ -208,7 +163,7 @@ app.get("/admin/edit/user/:id", (req, res) => {
             message: {
               type: "info",
               title: "Users",
-              text: `User does not exit`,
+              text: `User not found`,
             },
           })
           .end();
@@ -245,7 +200,7 @@ app.put("/admin/update/user/:id", (req, res) => {
               message: {
                 type: "info",
                 title: "Users",
-                text: `User does not exist`,
+                text: `User not found`,
               },
             })
             .end();
@@ -256,7 +211,7 @@ app.put("/admin/update/user/:id", (req, res) => {
             message: {
               type: "success",
               title: "Users",
-              text: `User was updated.`,
+              text: `User successfully updated`,
             },
           })
           .end();
@@ -281,7 +236,7 @@ app.put("/admin/update/user/:id", (req, res) => {
                 message: {
                   type: "info",
                   title: "Users",
-                  text: `User does not exist`,
+                  text: `User not found`,
                 },
               })
               .end();
@@ -292,7 +247,7 @@ app.put("/admin/update/user/:id", (req, res) => {
               message: {
                 type: "success",
                 title: "Users",
-                text: `User was updated.`,
+                text: `User successfully updated`,
               },
             })
             .end();
@@ -302,6 +257,112 @@ app.put("/admin/update/user/:id", (req, res) => {
   }, 1500);
 });
 
-app.listen(port, () => {
+app.post("/login", (req, res) => {
+  setTimeout((_) => {
+    const { email, password } = req.body;
+    const session = md5(uuidv4());
+
+    const sql = `
+            UPDATE users
+            SET session = ?
+            WHERE email = ? AND password = ?
+        `;
+
+    connection.query(sql, [session, email, md5(password)], (err, result) => {
+      if (err) throw err;
+      const logged = result.affectedRows;
+      if (!logged) {
+        res
+          .status(401)
+          .json({
+            message: {
+              type: "error",
+              title: "Login failed",
+              text: `Invalid login data`,
+            },
+          })
+          .end();
+        return;
+      }
+      const sql = `
+            SELECT id, name, email, role
+            FROM users
+            WHERE email = ? AND password = ?
+        `;
+      connection.query(sql, [email, md5(password)], (err, rows) => {
+        if (err) throw err;
+        res.cookie("book-session", session, {
+          maxAge: 1000 * 60 * 60 * 24,
+          httpOnly: true,
+        });
+        res
+          .json({
+            message: {
+              type: "success",
+              title: `Hello, ${rows?.[0]?.name}!`,
+              text: `You have successfully logged in`,
+            },
+            session,
+            user: rows?.[0],
+          })
+          .end();
+      });
+    });
+  }, 1500);
+});
+
+app.post("/register", (req, res) => {
+  const { name, email, password } = req.body;
+
+  if (!/\S+@\S+\.\S+/.test(email)) {
+    res
+      .status(422)
+      .json({
+        message: "There are errors in the form you are sending",
+        errorsBag: {
+          email: "Email format is incorrect",
+        },
+      })
+      .end();
+    return;
+  }
+
+  const sql = `SELECT email FROM users WHERE email = ? `;
+
+  connection.query(sql, [email], (err, rows) => {
+    if (err) throw err;
+    if (rows.length) {
+      res
+        .status(422)
+        .json({
+          message: "There are errors in the form you are sending",
+          errorsBag: {
+            email: "This email already exists",
+          },
+        })
+        .end();
+    } else {
+      const sql = `
+            INSERT INTO users (name, email, password)
+            VALUES ( ?, ?, ? )
+            `;
+      connection.query(sql, [name, email, md5(password)], (err) => {
+        if (err) throw err;
+        res
+          .status(201)
+          .json({
+            message: {
+              type: "success",
+              title: "Hello!",
+              text: `Nice to have you join us, ${name}`,
+            },
+          })
+          .end();
+      });
+    }
+  });
+});
+
+app.listen(port, (_) => {
   console.log(`Books app listening on port ${port}`);
 });

@@ -13,11 +13,17 @@ export const Auth = ({ children }) => {
     localStorage.setItem("bookUser", JSON.stringify(user));
   }, []);
 
+  const removeUser = useCallback((_) => {
+    setUser(null);
+    localStorage.removeItem("bookUser");
+  }, []);
+
   return (
     <AuthContext.Provider
       value={{
         user,
         addUser,
+        removeUser,
       }}
     >
       {children}

@@ -14,7 +14,7 @@ export default function Login() {
 
   const { setShow } = useContext(LoaderContext);
 
-  const { addUser } = useContext(AuthContext);
+  const { addUser, removeUser } = useContext(AuthContext);
 
   const handleForm = (e) => {
     setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
@@ -28,6 +28,8 @@ export default function Login() {
     if (serverResponse.type === "success") {
       addUser(serverResponse.serverData.user);
       window.location.href = l.SITE_HOME;
+    } else {
+      removeUser();
     }
   }, [serverResponse, addUser]);
 

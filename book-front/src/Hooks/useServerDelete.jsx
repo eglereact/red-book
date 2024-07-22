@@ -1,16 +1,18 @@
 import { useContext, useState } from "react";
-import { SERVER_URL } from "../Constants/urls";
+import * as l from "../Constants/urls";
 import axios from "axios";
 import { MessagesContext } from "../Contexts/Messages";
 import { LoaderContext } from "../Contexts/Loader";
+import { AuthContext } from "../Contexts/Auth";
 
 const useServerDelete = (url) => {
   const [response, setResponse] = useState(null);
   const { messageError, messageSuccess } = useContext(MessagesContext);
   const { setShow } = useContext(LoaderContext);
+  const { removeUser } = useContext(AuthContext);
   const doAction = (data) => {
     axios
-      .delete(`${SERVER_URL}${url}/${data.id}`, { withCredentials: true })
+      .delete(`${l.SERVER_URL}${url}/${data.id}`, { withCredentials: true })
       .then((res) => {
         messageSuccess(res);
         setResponse({
@@ -20,6 +22,15 @@ const useServerDelete = (url) => {
       })
       .catch((error) => {
         messageError(error);
+        if (
+          error.response &&
+          401 === error.response.status &&
+          "not-logged-in" === error.response.data.reason
+        ) {
+          removeUser();
+          window.location.href = l.SITE_LOGIN;
+          return;
+        }
         setResponse({
           type: "error",
           serverData: error,
