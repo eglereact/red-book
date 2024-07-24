@@ -9,14 +9,17 @@ import Dashboard from "../Components/Admin/Dashboard";
 import UsersList from "../Components/Admin/UsersList";
 import * as l from "../Constants/urls";
 import UserEdit from "../Components/Admin/UserEdit";
+import RouteGate from "../Components/Common/RouteGate";
 
 const RouterContext = createContext([]);
 
 const Router = ({ children }) => {
   const [route, setRoute] = useState("");
   const [params, setParams] = useState([]);
+  const [prevPageLink, setPrevPageLink] = useState(["", ""]);
 
   const handleHashChange = useCallback(() => {
+    setPrevPageLink((p) => [p[1], window.location.hash]);
     const hash = window.location.hash.split("/");
     hash[0] || (hash[0] = "#");
     setRoute(hash.shift());
@@ -24,6 +27,7 @@ const Router = ({ children }) => {
   }, [setRoute, setParams]);
 
   useEffect(() => {
+    setPrevPageLink((p) => [p[1], window.location.hash]);
     const hash = window.location.hash.split("/");
     hash[0] || (hash[0] = "#");
     setRoute(hash.shift());
@@ -104,9 +108,11 @@ const Router = ({ children }) => {
       pc: 1,
       p1: "dashboard",
       component: (
-        <Admin>
-          <Dashboard />
-        </Admin>
+        <RouteGate role={["admin"]}>
+          <Admin>
+            <Dashboard />
+          </Admin>
+        </RouteGate>
       ),
     },
     {
@@ -114,9 +120,11 @@ const Router = ({ children }) => {
       pc: 1,
       p1: "users",
       component: (
-        <Admin>
-          <UsersList />
-        </Admin>
+        <RouteGate role={["admin"]}>
+          <Admin>
+            <UsersList />
+          </Admin>
+        </RouteGate>
       ),
     },
     {
@@ -124,9 +132,11 @@ const Router = ({ children }) => {
       pc: 2,
       p1: "user-edit",
       component: (
-        <Admin>
-          <UserEdit />
-        </Admin>
+        <RouteGate role={["admin"]}>
+          <Admin>
+            <UserEdit />
+          </Admin>
+        </RouteGate>
       ),
     },
   ];
@@ -149,7 +159,7 @@ const Router = ({ children }) => {
   const routeComponent = findRoute()?.component ?? <Page404 />;
 
   return (
-    <RouterContext.Provider value={{ params }}>
+    <RouterContext.Provider value={{ params, prevPageLink }}>
       {routeComponent}
     </RouterContext.Provider>
   );

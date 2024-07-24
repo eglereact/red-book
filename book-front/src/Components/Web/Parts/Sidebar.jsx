@@ -2,10 +2,12 @@ import { useRef, useState } from "react";
 import Footer from "./Footer";
 import Menu from "./Menu";
 
-const Sidebar = () => {
+const Sidebar = ({ webContent }) => {
   const sidebar = useRef();
 
   const [showSidebar, setShowSidebar] = useState(true);
+
+  const contacts = webContent?.find((c) => c.name === "contacts")?.value;
 
   const toggleSidebar = () => {
     setShowSidebar((b) => !b);
@@ -68,29 +70,21 @@ const Sidebar = () => {
         </section>
 
         {/* <!-- Section --> */}
-        <section>
-          <header className="major">
-            <h2>Get in touch</h2>
-          </header>
-          <p>
-            Sed varius enim lorem ullamcorper dolore aliquam aenean ornare velit
-            lacus, ac varius enim lorem ullamcorper dolore. Proin sed aliquam
-            facilisis ante interdum. Sed nulla amet lorem feugiat tempus
-            aliquam.
-          </p>
-          <ul className="contact">
-            <li className="icon solid fa-envelope">
-              <a href="/#">information@untitled.tld</a>
-            </li>
-            <li className="icon solid fa-phone">(000) 000-0000</li>
-            <li className="icon solid fa-home">
-              1234 Somewhere Road #8254
-              <br />
-              Nashville, TN 00000-0000
-            </li>
-          </ul>
-        </section>
-
+        {contacts && (
+          <section>
+            <header className="major">
+              <h2>{contacts.title}</h2>
+            </header>
+            <p>{contacts.about}</p>
+            <ul className="contact">
+              <li className="icon solid fa-envelope">
+                <a href="/#">{contacts.email}</a>
+              </li>
+              <li className="icon solid fa-phone">{contacts.phone}</li>
+              <li className="icon solid fa-home">{contacts.address}</li>
+            </ul>
+          </section>
+        )}
         {/* <!-- Footer --> */}
         <Footer />
       </div>

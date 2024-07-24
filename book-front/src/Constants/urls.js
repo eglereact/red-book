@@ -19,5 +19,7 @@ export const SERVER_DELETE_USER = "admin/delete/user";
 export const SERVER_EDIT_USER = "admin/edit/user";
 export const SERVER_UPDATE_USER = "admin/update/user";
 
+export const GET_WEB_CONTENT = "web/content";
+
 export const SERVER_LOGIN = "login";
 export const SERVER_LOGOUT = "logout";

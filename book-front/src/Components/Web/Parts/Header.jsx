@@ -18,9 +18,7 @@ const Header = () => {
               <span className="label">Hello, {user.name}</span>
             </li>
             <li>
-              <button className="link">
-                <Logout />
-              </button>
+              <Logout />
             </li>
           </Gate>
         ) : (
