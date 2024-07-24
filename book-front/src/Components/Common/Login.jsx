@@ -4,6 +4,8 @@ import Input from "../Forms/Input";
 import useServerPost from "../../Hooks/useServerPost";
 import { LoaderContext } from "../../Contexts/Loader";
 import { AuthContext } from "../../Contexts/Auth";
+import Gate from "./Gate";
+import Redirect from "./Redirect";
 
 export default function Login() {
   const defaultValues = { email: "", password: "" };
@@ -31,7 +33,7 @@ export default function Login() {
     } else {
       removeUser();
     }
-  }, [serverResponse, addUser]);
+  }, [serverResponse, addUser, removeUser]);
 
   const submit = () => {
     setShow(true);
@@ -39,68 +41,76 @@ export default function Login() {
   };
 
   return (
-    <div id="wrapper">
-      <div id="main">
-        <div className="inner">
-          <header id="header">
-            <h2>Prisijungti</h2>
-          </header>
-          <section>
-            <header className="main">
-              <div className="row aln-center">
-                <div className="col-6 col-8-large col-10-medium col-12-small">
-                  <form>
-                    <div className="row gtr-uniform">
-                      <div className="col-6 col-12-xsmall">
-                        <Input
-                          onChange={handleForm}
-                          value={form.email}
-                          type="email"
-                          name="email"
-                          placeholder="El. paštas"
-                          autoComplete="email"
-                        />
-                      </div>
-                      <div className="col-6 col-12-xsmall">
-                        <Input
-                          onChange={handleForm}
-                          value={form.password}
-                          type="password"
-                          name="password"
-                          placeholder="Slaptažodis"
-                          autoComplete="password"
-                        />
-                      </div>
-                      <div className="col-12">
-                        <ul className="actions">
-                          <li>
-                            <input
-                              onClick={submit}
-                              type="button"
-                              value="Prisijungti"
-                              className="primary"
+    <>
+      <Gate status="not-logged">
+        <div id="wrapper">
+          <div id="main">
+            <div className="inner">
+              <header id="header">
+                <h2>Login</h2>
+              </header>
+              <section>
+                <header className="main">
+                  <div className="row aln-center">
+                    <div className="col-6 col-8-large col-10-medium col-12-small">
+                      <form>
+                        <div className="row gtr-uniform">
+                          <div className="col-6 col-12-xsmall">
+                            <Input
+                              onChange={handleForm}
+                              value={form.email}
+                              type="email"
+                              name="email"
+                              placeholder="El. paštas"
+                              autoComplete="email"
                             />
-                          </li>
-                        </ul>
-                      </div>
-                      <div className="col-12">
-                        <ul className="actions">
-                          <li>
-                            <a href={"/" + l.SITE_HOME}>Grįžti į pradinį</a>
-                          </li>
-                          <li>
-                            <a href={l.SITE_REGISTER}>Registruotis</a>
-                          </li>
-                        </ul>
-                      </div>
+                          </div>
+                          <div className="col-6 col-12-xsmall">
+                            <Input
+                              onChange={handleForm}
+                              value={form.password}
+                              type="password"
+                              name="password"
+                              placeholder="Slaptažodis"
+                              autoComplete="password"
+                            />
+                          </div>
+                          <div className="col-12">
+                            <ul className="actions">
+                              <li>
+                                <input
+                                  onClick={submit}
+                                  type="button"
+                                  value="Prisijungti"
+                                  className="primary"
+                                />
+                              </li>
+                            </ul>
+                          </div>
+                          <div className="col-12">
+                            <ul className="actions">
+                              <li>
+                                <a href={"/" + l.SITE_HOME}>Grįžti į pradinį</a>
+                              </li>
+                              <li>
+                                <a href={l.SITE_REGISTER}>Registruotis</a>
+                              </li>
+                            </ul>
+                          </div>
+                        </div>
+                      </form>
                     </div>
-                  </form>
-                </div>
-              </div>
-            </header>
-          </section>
+                  </div>
+                </header>
+              </section>
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
+      </Gate>
+
+      <Gate status="logged">
+        <Redirect to="SITE_HOME" />
+      </Gate>
+    </>
   );
 }

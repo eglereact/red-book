@@ -363,6 +363,46 @@ app.post("/register", (req, res) => {
   });
 });
 
+app.post("/logout", (req, res) => {
+  setTimeout((_) => {
+    const session = req.cookies["book-session"];
+
+    const sql = `
+                UPDATE users
+                SET session = NULL
+                WHERE session = ?
+            `;
+
+    connection.query(sql, [session], (err, result) => {
+      if (err) throw err;
+      const logged = result.affectedRows;
+      if (!logged) {
+        res
+          .status(401)
+          .json({
+            message: {
+              type: "error",
+              title: "Logout failed",
+              text: `Invalid login data`,
+            },
+          })
+          .end();
+        return;
+      }
+      res.clearCookie("book-session");
+      res
+        .json({
+          message: {
+            type: "success",
+            title: `Disconnected`,
+            text: `You have successfully logged out`,
+          },
+        })
+        .end();
+    });
+  }, 1500);
+});
+
 app.listen(port, (_) => {
   console.log(`Books app listening on port ${port}`);
 });

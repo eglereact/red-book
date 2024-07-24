@@ -13,7 +13,7 @@ const useServerPost = (url) => {
   const { setShow } = useContext(LoaderContext);
   const { removeUser } = useContext(AuthContext);
 
-  const doAction = (data) => {
+  const doAction = (data = {}) => {
     axios
       .post(`${l.SERVER_URL}${url}`, data, { withCredentials: true })
       .then((res) => {

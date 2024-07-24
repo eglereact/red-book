@@ -1,0 +1,29 @@
+import { useContext, useEffect } from "react";
+import { AuthContext } from "../../Contexts/Auth";
+import * as l from "../../Constants/urls";
+import useServerPost from "../../Hooks/useServerPost";
+import { LoaderContext } from "../../Contexts/Loader";
+
+export default function Logout() {
+  const { user, removeUser } = useContext(AuthContext);
+
+  const { doAction, serverResponse } = useServerPost(l.SERVER_LOGOUT);
+
+  const { setShow } = useContext(LoaderContext);
+
+  useEffect(() => {
+    if (null === serverResponse) {
+      return;
+    }
+    if (serverResponse.type === "success") {
+      removeUser();
+      window.location.href = l.SITE_LOGIN;
+    }
+  }, [serverResponse, removeUser]);
+
+  return (
+    <button className="link" onClick={() => doAction() || setShow(true)}>
+      <span className="label">Logout</span>
+    </button>
+  );
+}

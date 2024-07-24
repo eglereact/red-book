@@ -10,18 +10,18 @@ import { Auth } from "./Contexts/Auth";
 
 function App() {
   return (
-    <Auth>
-      <Messages>
-        <Loader>
+    <Messages>
+      <Loader>
+        <Auth>
           <Modals>
             <Msg />
             <DeleteModal />
             <LoaderContainer />
             <Router />
           </Modals>
-        </Loader>
-      </Messages>
-    </Auth>
+        </Auth>
+      </Loader>
+    </Messages>
   );
 }
 

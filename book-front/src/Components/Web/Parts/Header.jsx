@@ -1,6 +1,8 @@
 import { useContext } from "react";
 import * as l from "../../../Constants/urls";
 import { AuthContext } from "../../../Contexts/Auth";
+import Logout from "../../Common/Logout";
+import Gate from "../../Common/Gate";
 
 const Header = () => {
   const { user } = useContext(AuthContext);
@@ -11,18 +13,18 @@ const Header = () => {
       </a>
       <ul className="icons">
         {user ? (
-          <>
+          <Gate status="logged">
             <li>
               <span className="label">Hello, {user.name}</span>
             </li>
             <li>
               <button className="link">
-                <span className="label">Logout</span>
+                <Logout />
               </button>
             </li>
-          </>
+          </Gate>
         ) : (
-          <>
+          <Gate status="not-logged">
             <li>
               <a href={l.SITE_LOGIN}>
                 <span className="label">Sign In</span>
@@ -33,14 +35,15 @@ const Header = () => {
                 <span className="label">Sign Up</span>
               </a>
             </li>
-          </>
+          </Gate>
         )}
-
-        <li>
-          <a href={l.SITE_DASHBOARD}>
-            <span className="label">ADMIN </span>
-          </a>
-        </li>
+        <Gate status="role" role={["admin"]}>
+          <li>
+            <a href={l.SITE_DASHBOARD}>
+              <span className="label">ADMIN </span>
+            </a>
+          </li>
+        </Gate>
       </ul>
     </header>
   );
