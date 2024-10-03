@@ -10,37 +10,28 @@ export default function Home() {
   const { doAction: doGetPosts, serverResponse: serverGetPostsResponse } =
     useServerGet(l.GET_POSTS);
 
-  useEffect(
-    (_) => {
-      doGetTypes();
-      doGetPosts();
-    },
-    [doGetTypes, doGetPosts]
-  );
+  useEffect(() => {
+    doGetTypes();
+    doGetPosts();
+  }, [doGetTypes, doGetPosts]);
 
-  useEffect(
-    (_) => {
-      if (null === serverGetTypesResponse) {
-        return;
-      }
-      if (serverGetTypesResponse.type === "success") {
-        setTypes(serverGetTypesResponse.serverData.types);
-      }
-    },
-    [serverGetTypesResponse]
-  );
+  useEffect(() => {
+    if (null === serverGetTypesResponse) {
+      return;
+    }
+    if (serverGetTypesResponse.type === "success") {
+      setTypes(serverGetTypesResponse.serverData.types);
+    }
+  }, [serverGetTypesResponse]);
 
-  useEffect(
-    (_) => {
-      if (null === serverGetPostsResponse) {
-        return;
-      }
-      if (serverGetPostsResponse.type === "success") {
-        setPosts(serverGetPostsResponse.serverData.posts);
-      }
-    },
-    [serverGetPostsResponse]
-  );
+  useEffect(() => {
+    if (null === serverGetPostsResponse) {
+      return;
+    }
+    if (serverGetPostsResponse.type === "success") {
+      setPosts(serverGetPostsResponse.serverData.posts);
+    }
+  }, [serverGetPostsResponse]);
 
   const topPost = posts === null ? null : posts.find((p) => p.is_top === 1);
 
@@ -50,7 +41,7 @@ export default function Home() {
     <>
       <section id="banner">
         {topPost === null ? (
-          <p>Palaukite kraunasi...</p>
+          <p>Loading...</p>
         ) : (
           <>
             <div className="content">
@@ -64,7 +55,7 @@ export default function Home() {
                     href={l.SITE_POST + "/" + topPost.id}
                     className="button big"
                   >
-                    Skaityti daugiau
+                    Read more
                   </a>
                 </li>
               </ul>
@@ -73,7 +64,7 @@ export default function Home() {
               {topPost.photo === null ? (
                 <img
                   src={l.SERVER_IMAGES_URL + "no-image.png"}
-                  alt="nėra nuotraukos"
+                  alt="no image"
                 />
               ) : (
                 <img
@@ -92,7 +83,7 @@ export default function Home() {
         </header>
         <div className="features">
           {types === null ? (
-            <p>Palaukite kraunasi...</p>
+            <p>Loading...</p>
           ) : (
             types.map((t) => (
               <article key={t.id}>
@@ -113,7 +104,7 @@ export default function Home() {
         </header>
         <div className="posts">
           {allPosts === null ? (
-            <p>Palaukite kraunasi...</p>
+            <p>Loading...</p>
           ) : (
             allPosts.map((p) => (
               <article key={p.id}>
@@ -121,7 +112,7 @@ export default function Home() {
                   {p.photo === null ? (
                     <img
                       src={l.SERVER_IMAGES_URL + "no-image.png"}
-                      alt="nėra nuotraukos"
+                      alt="no photo"
                     />
                   ) : (
                     <img src={l.SERVER_IMAGES_URL + p.photo} alt={p.title} />
@@ -132,7 +123,7 @@ export default function Home() {
                 <ul className="actions">
                   <li>
                     <a href={l.SITE_POST + "/" + p.id} className="button">
-                      Daugiau
+                      More
                     </a>
                   </li>
                 </ul>

@@ -469,6 +469,30 @@ app.post("/logout", (req, res) => {
   }, 1500);
 });
 
-app.listen(port, (_) => {
+app.get("/web/types", (req, res) => {
+  const sql = `SELECT * FROM types`;
+  connection.query(sql, (err, rows) => {
+    if (err) throw err;
+    res
+      .json({
+        types: rows,
+      })
+      .end();
+  });
+});
+
+app.get("/web/posts", (req, res) => {
+  const sql = `SELECT * FROM posts`;
+  connection.query(sql, (err, rows) => {
+    if (err) throw err;
+    res
+      .json({
+        posts: rows,
+      })
+      .end();
+  });
+});
+
+app.listen(port, () => {
   console.log(`Books app listening on port ${port}`);
 });
