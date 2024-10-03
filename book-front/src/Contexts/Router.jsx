@@ -10,6 +10,7 @@ import UsersList from "../Components/Admin/UsersList";
 import * as l from "../Constants/urls";
 import UserEdit from "../Components/Admin/UserEdit";
 import RouteGate from "../Components/Common/RouteGate";
+import EditContacts from "../Components/Admin/EditContacts";
 
 const RouterContext = createContext([]);
 
@@ -135,6 +136,18 @@ const Router = ({ children }) => {
         <RouteGate role={["admin"]}>
           <Admin>
             <UserEdit />
+          </Admin>
+        </RouteGate>
+      ),
+    },
+    {
+      path: l.EDIT_CONTACTS,
+      pc: 1,
+      p1: "edit-contacts",
+      component: (
+        <RouteGate role={["admin"]}>
+          <Admin>
+            <EditContacts />
           </Admin>
         </RouteGate>
       ),

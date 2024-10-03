@@ -1,207 +1,146 @@
-const Home = () => {
+import { useEffect, useState } from "react";
+import useServerGet from "../../Hooks/useServerGet";
+import * as l from "../../Constants/urls";
+
+export default function Home() {
+  const [types, setTypes] = useState(null);
+  const [posts, setPosts] = useState(null);
+  const { doAction: doGetTypes, serverResponse: serverGetTypesResponse } =
+    useServerGet(l.GET_TYPES);
+  const { doAction: doGetPosts, serverResponse: serverGetPostsResponse } =
+    useServerGet(l.GET_POSTS);
+
+  useEffect(
+    (_) => {
+      doGetTypes();
+      doGetPosts();
+    },
+    [doGetTypes, doGetPosts]
+  );
+
+  useEffect(
+    (_) => {
+      if (null === serverGetTypesResponse) {
+        return;
+      }
+      if (serverGetTypesResponse.type === "success") {
+        setTypes(serverGetTypesResponse.serverData.types);
+      }
+    },
+    [serverGetTypesResponse]
+  );
+
+  useEffect(
+    (_) => {
+      if (null === serverGetPostsResponse) {
+        return;
+      }
+      if (serverGetPostsResponse.type === "success") {
+        setPosts(serverGetPostsResponse.serverData.posts);
+      }
+    },
+    [serverGetPostsResponse]
+  );
+
+  const topPost = posts === null ? null : posts.find((p) => p.is_top === 1);
+
+  const allPosts = posts === null ? [] : posts.filter((p) => p.is_top === 0);
+
   return (
     <>
-      {/* <!-- Banner --> */}
       <section id="banner">
-        <div className="content">
-          <header>
-            <h1>
-              Hi, I’m Editorial
-              <br />
-              by HTML5 UP
-            </h1>
-            <p>A free and fully responsive site template</p>
-          </header>
-          <p>
-            Aenean ornare velit lacus, ac varius enim ullamcorper eu. Proin
-            aliquam facilisis ante interdum congue. Integer mollis, nisl amet
-            convallis, porttitor magna ullamcorper, amet egestas mauris. Ut
-            magna finibus nisi nec lacinia. Nam maximus erat id euismod egestas.
-            Pellentesque sapien ac quam. Lorem ipsum dolor sit nullam.
-          </p>
-          <ul className="actions">
-            <li>
-              <a href="/#" className="button big">
-                Learn More
-              </a>
-            </li>
-          </ul>
-        </div>
-        <span className="image object">
-          <img src="images/pic10.jpg" alt="" />
-        </span>
+        {topPost === null ? (
+          <p>Palaukite kraunasi...</p>
+        ) : (
+          <>
+            <div className="content">
+              <header>
+                <h1>{topPost.title}</h1>
+              </header>
+              <p>{topPost.preview}</p>
+              <ul className="actions">
+                <li>
+                  <a
+                    href={l.SITE_POST + "/" + topPost.id}
+                    className="button big"
+                  >
+                    Skaityti daugiau
+                  </a>
+                </li>
+              </ul>
+            </div>
+            <span className="image object">
+              {topPost.photo === null ? (
+                <img
+                  src={l.SERVER_IMAGES_URL + "no-image.png"}
+                  alt="nėra nuotraukos"
+                />
+              ) : (
+                <img
+                  src={l.SERVER_IMAGES_URL + topPost.photo}
+                  alt={topPost.title}
+                />
+              )}
+            </span>
+          </>
+        )}
       </section>
 
-      {/* <!-- Section --> */}
       <section>
         <header className="major">
           <h2>Erat lacinia</h2>
         </header>
         <div className="features">
-          <article>
-            <span className="icon fa-gem"></span>
-            <div className="content">
-              <h3>Portitor ullamcorper</h3>
-              <p>
-                Aenean ornare velit lacus, ac varius enim lorem ullamcorper
-                dolore. Proin aliquam facilisis ante interdum. Sed nulla amet
-                lorem feugiat tempus aliquam.
-              </p>
-            </div>
-          </article>
-          <article>
-            <span className="icon solid fa-paper-plane"></span>
-            <div className="content">
-              <h3>Sapien veroeros</h3>
-              <p>
-                Aenean ornare velit lacus, ac varius enim lorem ullamcorper
-                dolore. Proin aliquam facilisis ante interdum. Sed nulla amet
-                lorem feugiat tempus aliquam.
-              </p>
-            </div>
-          </article>
-          <article>
-            <span className="icon solid fa-rocket"></span>
-            <div className="content">
-              <h3>Quam lorem ipsum</h3>
-              <p>
-                Aenean ornare velit lacus, ac varius enim lorem ullamcorper
-                dolore. Proin aliquam facilisis ante interdum. Sed nulla amet
-                lorem feugiat tempus aliquam.
-              </p>
-            </div>
-          </article>
-          <article>
-            <span className="icon solid fa-signal"></span>
-            <div className="content">
-              <h3>Sed magna finibus</h3>
-              <p>
-                Aenean ornare velit lacus, ac varius enim lorem ullamcorper
-                dolore. Proin aliquam facilisis ante interdum. Sed nulla amet
-                lorem feugiat tempus aliquam.
-              </p>
-            </div>
-          </article>
+          {types === null ? (
+            <p>Palaukite kraunasi...</p>
+          ) : (
+            types.map((t) => (
+              <article key={t.id}>
+                <span className={"icon " + t.icon}></span>
+                <div className="content">
+                  <h3>{t.title}</h3>
+                  <p>{t.description}</p>
+                </div>
+              </article>
+            ))
+          )}
         </div>
       </section>
 
-      {/* <!-- Section --> */}
       <section>
         <header className="major">
           <h2>Ipsum sed dolor</h2>
         </header>
         <div className="posts">
-          <article>
-            <a href="/#" className="image">
-              <img src="images/pic01.jpg" alt="" />
-            </a>
-            <h3>Interdum aenean</h3>
-            <p>
-              Aenean ornare velit lacus, ac varius enim lorem ullamcorper
-              dolore. Proin aliquam facilisis ante interdum. Sed nulla amet
-              lorem feugiat tempus aliquam.
-            </p>
-            <ul className="actions">
-              <li>
-                <a href="/#" className="button">
-                  More
+          {allPosts === null ? (
+            <p>Palaukite kraunasi...</p>
+          ) : (
+            allPosts.map((p) => (
+              <article key={p.id}>
+                <a href={l.SITE_POST + "/" + p.id} className="image">
+                  {p.photo === null ? (
+                    <img
+                      src={l.SERVER_IMAGES_URL + "no-image.png"}
+                      alt="nėra nuotraukos"
+                    />
+                  ) : (
+                    <img src={l.SERVER_IMAGES_URL + p.photo} alt={p.title} />
+                  )}
                 </a>
-              </li>
-            </ul>
-          </article>
-          <article>
-            <a href="/#" className="image">
-              <img src="images/pic02.jpg" alt="" />
-            </a>
-            <h3>Nulla amet dolore</h3>
-            <p>
-              Aenean ornare velit lacus, ac varius enim lorem ullamcorper
-              dolore. Proin aliquam facilisis ante interdum. Sed nulla amet
-              lorem feugiat tempus aliquam.
-            </p>
-            <ul className="actions">
-              <li>
-                <a href="/#" className="button">
-                  More
-                </a>
-              </li>
-            </ul>
-          </article>
-          <article>
-            <a href="/#" className="image">
-              <img src="images/pic03.jpg" alt="" />
-            </a>
-            <h3>Tempus ullamcorper</h3>
-            <p>
-              Aenean ornare velit lacus, ac varius enim lorem ullamcorper
-              dolore. Proin aliquam facilisis ante interdum. Sed nulla amet
-              lorem feugiat tempus aliquam.
-            </p>
-            <ul className="actions">
-              <li>
-                <a href="/#" className="button">
-                  More
-                </a>
-              </li>
-            </ul>
-          </article>
-          <article>
-            <a href="/#" className="image">
-              <img src="images/pic04.jpg" alt="" />
-            </a>
-            <h3>Sed etiam facilis</h3>
-            <p>
-              Aenean ornare velit lacus, ac varius enim lorem ullamcorper
-              dolore. Proin aliquam facilisis ante interdum. Sed nulla amet
-              lorem feugiat tempus aliquam.
-            </p>
-            <ul className="actions">
-              <li>
-                <a href="/#" className="button">
-                  More
-                </a>
-              </li>
-            </ul>
-          </article>
-          <article>
-            <a href="/#" className="image">
-              <img src="images/pic05.jpg" alt="" />
-            </a>
-            <h3>Feugiat lorem aenean</h3>
-            <p>
-              Aenean ornare velit lacus, ac varius enim lorem ullamcorper
-              dolore. Proin aliquam facilisis ante interdum. Sed nulla amet
-              lorem feugiat tempus aliquam.
-            </p>
-            <ul className="actions">
-              <li>
-                <a href="/#" className="button">
-                  More
-                </a>
-              </li>
-            </ul>
-          </article>
-          <article>
-            <a href="/#" className="image">
-              <img src="images/pic06.jpg" alt="" />
-            </a>
-            <h3>Amet varius aliquam</h3>
-            <p>
-              Aenean ornare velit lacus, ac varius enim lorem ullamcorper
-              dolore. Proin aliquam facilisis ante interdum. Sed nulla amet
-              lorem feugiat tempus aliquam.
-            </p>
-            <ul className="actions">
-              <li>
-                <a href="/#" className="button">
-                  More
-                </a>
-              </li>
-            </ul>
-          </article>
+                <h3>{p.title}</h3>
+                <p>{p.preview}</p>
+                <ul className="actions">
+                  <li>
+                    <a href={l.SITE_POST + "/" + p.id} className="button">
+                      Daugiau
+                    </a>
+                  </li>
+                </ul>
+              </article>
+            ))
+          )}
         </div>
       </section>
     </>
   );
-};
-export default Home;
+}

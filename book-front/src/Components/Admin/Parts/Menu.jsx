@@ -8,10 +8,13 @@ export default function Menu() {
       </header>
       <ul>
         <li>
-          <a href={l.SITE_DASHBOARD}>Dashboard</a>
+          <a href={"/" + l.SITE_DASHBOARD}>Dashboard</a>
         </li>
         <li>
-          <a href={l.USERS_LIST}>Users</a>
+          <a href={"/" + l.USERS_LIST}>Users</a>
+        </li>
+        <li>
+          <a href={"/" + l.EDIT_CONTACTS}>Contacts edit</a>
         </li>
       </ul>
     </nav>
