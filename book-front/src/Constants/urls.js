@@ -23,6 +23,16 @@ export const SERVER_EDIT_USER = "admin/edit/user";
 export const SERVER_UPDATE_USER = "admin/update/user";
 export const SERVER_EDIT_CONTACTS = "admin/edit/contacts";
 export const SERVER_UPDATE_CONTACTS = "admin/update/contacts";
+export const POSTS_LIST = "#admin/posts";
+export const POST_ADD = "#admin/post-add";
+export const POST_EDIT = "#admin/post-edit";
+
+export const SERVER_GET_POSTS = "admin/posts";
+export const SERVER_DELETE_POST = "admin/delete/post";
+export const SERVER_EDIT_POST = "admin/edit/post";
+export const SERVER_UPDATE_POST = "admin/update/post";
+export const SERVER_STORE_POST = "admin/store/post";
+export const SERVER_CHANGE_POST_TOP = "admin/change/post/top";
 
 export const GET_WEB_CONTENT = "web/content";
 export const GET_TYPES = "web/types";

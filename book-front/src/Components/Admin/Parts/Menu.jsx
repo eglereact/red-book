@@ -16,6 +16,12 @@ export default function Menu() {
         <li>
           <a href={"/" + l.EDIT_CONTACTS}>Contacts edit</a>
         </li>
+        <li>
+          <a href={"/" + l.POSTS_LIST}>Posts</a>
+        </li>
+        <li>
+          <a href={"/" + l.POST_ADD}>New Post</a>
+        </li>
       </ul>
     </nav>
   );

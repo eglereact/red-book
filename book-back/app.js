@@ -4,7 +4,7 @@ const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
 const mysql = require("mysql");
 const { v4: uuidv4 } = require("uuid");
-// const fs = require('node:fs');
+const fs = require("node:fs");
 const md5 = require("md5");
 const app = express();
 const port = 3001;
@@ -26,9 +26,51 @@ app.use(
 );
 
 app.use(cookieParser());
-// app.use(express.static('public'));
+app.use(express.static("public"));
+app.use(express.json({ limit: "10mb" }));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
+
+// files
+const writeImage = (imageBase64) => {
+  if (!imageBase64) {
+    return null;
+  }
+  let type;
+  let image;
+  if (imageBase64.indexOf("data:image/png;base64,") === 0) {
+    type = "png";
+    image = Buffer.from(
+      imageBase64.replace(/^data:image\/png;base64,/, ""),
+      "base64"
+    );
+  } else if (imageBase64.indexOf("data:image/jpeg;base64,") === 0) {
+    type = "jpg";
+    image = Buffer.from(
+      imageBase64.replace(/^data:image\/jpeg;base64,/, ""),
+      "base64"
+    );
+  } else {
+    res.status(500).send("Bad image format");
+    return;
+  }
+  const filename = md5(uuidv4()) + "." + type;
+  fs.writeFileSync("public/img/" + filename, image);
+  return filename;
+};
+
+const deleteImage = (postId) => {
+  let sql = "SELECT photo FROM posts WHERE id = ?";
+  connection.query(sql, [postId], (err, results) => {
+    if (err) {
+      res.status;
+    } else {
+      if (results[0].photo) {
+        fs.unlinkSync("public/img/" + results[0].photo);
+      }
+    }
+  });
+};
 
 const checkSession = (req, _, next) => {
   const session = req.cookies["book-session"];
@@ -488,6 +530,265 @@ app.get("/web/posts", (req, res) => {
     res
       .json({
         posts: rows,
+      })
+      .end();
+  });
+});
+
+app.get("/web/post/:id", (req, res) => {
+  const { id } = req.params;
+  const sql = `SELECT * FROM posts WHERE id = ?`;
+  connection.query(sql, [id], (err, rows) => {
+    if (err) throw err;
+    if (!rows.length) {
+      res
+        .status(404)
+        .json({
+          message: {
+            type: "info",
+            title: "Straipsniai",
+            text: `Straipsnis nerastas`,
+          },
+        })
+        .end();
+      return;
+    }
+    res
+      .json({
+        post: rows[0],
+      })
+      .end();
+  });
+});
+
+app.get("/admin/posts", (req, res) => {
+  if (!checkUserIsAuthorized(req, res, ["admin"])) {
+    return;
+  }
+  const sql = `
+        SELECT id, title, preview, photo, is_top
+        FROM posts`;
+  connection.query(sql, (err, rows) => {
+    if (err) throw err;
+    res
+      .json({
+        posts: rows,
+      })
+      .end();
+  });
+});
+
+app.delete("/admin/delete/post/:id", (req, res) => {
+  const { id } = req.params;
+  let filename = null;
+  let sql = "SELECT photo FROM posts WHERE id = ?";
+  connection.query(sql, [id], (err, results) => {
+    if (results[0].photo) {
+      filename = results[0].photo;
+      const sql = `
+                    DELETE 
+                    FROM posts 
+                    WHERE id = ? AND is_top = 0
+                    `;
+      connection.query(sql, [id], (err, result) => {
+        if (err) throw err;
+        const deleted = result.affectedRows;
+        if (!deleted) {
+          res
+            .status(422)
+            .json({
+              message: {
+                type: "info",
+                title: "Posts",
+                text: `It is a top post so it can't be delete or post does not exist.`,
+              },
+            })
+            .end();
+          return;
+        }
+        if (filename) {
+          fs.unlinkSync("public/img/" + filename);
+        }
+        res
+          .json({
+            message: {
+              type: "success",
+              title: "Posts",
+              text: `Posts is successfully deleted.`,
+            },
+          })
+          .end();
+      });
+    }
+  });
+});
+
+app.get("/admin/edit/post/:id", (req, res) => {
+  if (!checkUserIsAuthorized(req, res, ["admin"])) {
+    return;
+  }
+  const { id } = req.params;
+  const sql = `
+        SELECT *
+        FROM posts
+        WHERE id = ?
+        `;
+  connection.query(sql, [id], (err, rows) => {
+    if (err) throw err;
+    if (!rows.length) {
+      res
+        .status(404)
+        .json({
+          message: {
+            type: "info",
+            title: "Posts",
+            text: `Post does not exist.`,
+          },
+        })
+        .end();
+      return;
+    }
+    res
+      .json({
+        post: rows[0],
+      })
+      .end();
+  });
+});
+
+app.put("/admin/change/post/top/:id", (req, res) => {
+  const { id } = req.params;
+
+  const sql = `
+            UPDATE posts 
+            SET is_top = CASE WHEN id = ? THEN 1 ELSE 0 END
+            `;
+
+  connection.query(sql, [id], (err, result) => {
+    if (err) throw err;
+    const updated = result.affectedRows;
+    if (!updated) {
+      res
+        .status(404)
+        .json({
+          message: {
+            type: "info",
+            title: "Posts",
+            text: `Post does not exits.`,
+          },
+        })
+        .end();
+      return;
+    }
+    res
+      .json({
+        message: {
+          type: "success",
+          title: "Posts",
+          text: `Post is made the main one`,
+        },
+        newId: id,
+      })
+      .end();
+  });
+});
+
+app.put("/admin/update/post/:id", (req, res) => {
+  const { id } = req.params;
+
+  const { title, content, preview, photo } = req.body;
+
+  if (photo) {
+    photo.length > 40 && deleteImage(id);
+    const filename = photo.length > 40 ? writeImage(photo) : photo;
+    const sql = `
+            UPDATE posts
+            SET title = ?, content = ?, preview = ?, photo = ?
+            WHERE id = ?
+            `;
+    connection.query(
+      sql,
+      [title, content, preview, filename, id],
+      (err, result) => {
+        if (err) throw err;
+        const updated = result.affectedRows;
+        if (!updated) {
+          res
+            .status(404)
+            .json({
+              message: {
+                type: "info",
+                title: "Posts",
+                text: `Post does not exist.`,
+              },
+            })
+            .end();
+          return;
+        }
+        res
+          .json({
+            message: {
+              type: "success",
+              title: "Posts",
+              text: `Posts successfully updated.`,
+            },
+          })
+          .end();
+      }
+    );
+  } else {
+    deleteImage(id);
+    const sql = `
+            UPDATE posts
+            SET title = ?, content = ?, preview = ?, photo = NULL
+            WHERE id = ?
+            `;
+    connection.query(sql, [title, content, preview, id], (err, result) => {
+      if (err) throw err;
+      const updated = result.affectedRows;
+      if (!updated) {
+        res
+          .status(404)
+          .json({
+            message: {
+              type: "info",
+              title: "Straipsniai",
+              text: `Straipsnis nerastas`,
+            },
+          })
+          .end();
+        return;
+      }
+      res
+        .json({
+          message: {
+            type: "success",
+            title: "Straipsniai",
+            text: `Straipsnis sėkmingai atnaujintas`,
+          },
+        })
+        .end();
+    });
+  }
+});
+
+app.post("/admin/store/post", (req, res) => {
+  const { title, content, preview, photo } = req.body;
+  const filename = writeImage(photo);
+  const sql = `
+            INSERT INTO posts (title, content, preview, photo)
+            VALUES ( ?, ?, ?, ? )
+            `;
+  connection.query(sql, [title, content, preview, filename], (err) => {
+    if (err) throw err;
+    res
+      .status(201)
+      .json({
+        message: {
+          type: "success",
+          title: "Posts",
+          text: `Post successfully created.`,
+        },
       })
       .end();
   });

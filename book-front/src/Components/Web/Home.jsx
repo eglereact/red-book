@@ -62,10 +62,7 @@ export default function Home() {
             </div>
             <span className="image object">
               {topPost.photo === null ? (
-                <img
-                  src={l.SERVER_IMAGES_URL + "no-image.png"}
-                  alt="no image"
-                />
+                <img src={l.SERVER_IMAGES_URL + "noimage.jpg"} alt="no image" />
               ) : (
                 <img
                   src={l.SERVER_IMAGES_URL + topPost.photo}
@@ -111,7 +108,7 @@ export default function Home() {
                 <a href={l.SITE_POST + "/" + p.id} className="image">
                   {p.photo === null ? (
                     <img
-                      src={l.SERVER_IMAGES_URL + "no-image.png"}
+                      src={l.SERVER_IMAGES_URL + "noimage.jpg"}
                       alt="no photo"
                     />
                   ) : (

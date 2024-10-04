@@ -67,6 +67,7 @@ table {
           border: solid 1px _palette(border);
           border-left-width: 0;
           border-top-width: 0;
+          vertical-align: middle;
 
           &:first-child {
             border-left-width: 1px;

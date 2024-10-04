@@ -11,6 +11,10 @@ import * as l from "../Constants/urls";
 import UserEdit from "../Components/Admin/UserEdit";
 import RouteGate from "../Components/Common/RouteGate";
 import EditContacts from "../Components/Admin/EditContacts";
+import PostsList from "../Components/Admin/PostsList";
+import Post from "../Components/Web/Post";
+import PostEdit from "../Components/Admin/PostEdit";
+import PostCreate from "../Components/Admin/PostCreate";
 
 const RouterContext = createContext([]);
 
@@ -73,6 +77,15 @@ const Router = ({ children }) => {
       component: (
         <Web>
           <Home />
+        </Web>
+      ),
+    },
+    {
+      path: l.SITE_POST,
+      pc: 1,
+      component: (
+        <Web>
+          <Post />
         </Web>
       ),
     },
@@ -148,6 +161,42 @@ const Router = ({ children }) => {
         <RouteGate role={["admin"]}>
           <Admin>
             <EditContacts />
+          </Admin>
+        </RouteGate>
+      ),
+    },
+    {
+      path: l.POSTS_LIST,
+      pc: 1,
+      p1: "posts",
+      component: (
+        <RouteGate role={["admin"]}>
+          <Admin>
+            <PostsList />
+          </Admin>
+        </RouteGate>
+      ),
+    },
+    {
+      path: l.POST_EDIT,
+      pc: 2,
+      p1: "post-edit",
+      component: (
+        <RouteGate role={["admin"]}>
+          <Admin>
+            <PostEdit />
+          </Admin>
+        </RouteGate>
+      ),
+    },
+    {
+      path: l.POST_ADD,
+      pc: 1,
+      p1: "post-add",
+      component: (
+        <RouteGate role={["admin"]}>
+          <Admin>
+            <PostCreate />
           </Admin>
         </RouteGate>
       ),
