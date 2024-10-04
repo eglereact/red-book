@@ -74,7 +74,7 @@ export default function PostEdit() {
     setImageName("No image");
   };
 
-  const submit = (_) => {
+  const submit = () => {
     //TODO: Validation
     setShow(true);
     doPut(post);

@@ -18,7 +18,7 @@ export default function Image({
         <span className={errors[name] ? "show" : ""}>{errors[name] ?? ""}</span>
       </div>
       <label className="img-label" htmlFor={name}>
-        Pridėti nuotrauką: {imageName}
+        Add a photo: {imageName}
       </label>
       <input
         className={errors[name] ? "error" : ""}

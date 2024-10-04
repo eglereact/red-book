@@ -129,142 +129,166 @@ const checkUserIsAuthorized = (req, res, roles) => {
 app.use(checkSession);
 
 app.get("/web/content", (req, res) => {
-  setTimeout((_) => {
-    const sql = `
+  const sql = `
         SELECT *
         FROM options`;
 
-    connection.query(sql, (err, rows) => {
-      if (err) throw err;
-      res
-        .json({
-          content: rows,
-        })
-        .end();
-    });
-  }, 1500);
+  connection.query(sql, (err, rows) => {
+    if (err) throw err;
+    res
+      .json({
+        content: rows,
+      })
+      .end();
+  });
 });
 
 app.get("/admin/edit/contacts", (req, res) => {
-  setTimeout((_) => {
-    const sql = `
+  const sql = `
         SELECT value
         FROM options
         WHERE name = 'contacts'`;
-    connection.query(sql, (err, rows) => {
-      if (err) throw err;
-      res
-        .json({
-          contacts: rows[0],
-        })
-        .end();
-    });
-  }, 1500);
+  connection.query(sql, (err, rows) => {
+    if (err) throw err;
+    res
+      .json({
+        contacts: rows[0],
+      })
+      .end();
+  });
 });
 
 app.put("/admin/update/contacts", (req, res) => {
-  setTimeout((_) => {
-    const { title, email, about, phone, address } = req.body;
+  const { title, email, about, phone, address } = req.body;
 
-    //TODO: Validation
+  //TODO: Validation
 
-    const value = JSON.stringify({ title, email, about, phone, address });
+  const value = JSON.stringify({ title, email, about, phone, address });
 
-    const sql = `
+  const sql = `
                 UPDATE options
                 SET value = ?
                 WHERE name = 'contacts'
                 `;
 
-    connection.query(sql, [value], (err) => {
-      if (err) throw err;
-      res
-        .json({
-          message: {
-            type: "success",
-            title: "Users",
-            text: `Contacts successfully updated`,
-          },
-        })
-        .end();
-    });
-  }, 1500);
+  connection.query(sql, [value], (err) => {
+    if (err) throw err;
+    res
+      .json({
+        message: {
+          type: "success",
+          title: "Users",
+          text: `Contacts successfully updated`,
+        },
+      })
+      .end();
+  });
 });
 
 app.get("/admin/users", (req, res) => {
-  setTimeout(() => {
-    if (!checkUserIsAuthorized(req, res, ["admin", "editor"])) {
-      return;
-    }
-    const sql = `
+  if (!checkUserIsAuthorized(req, res, ["admin", "editor"])) {
+    return;
+  }
+  const sql = `
         SELECT *
         FROM users`;
 
-    connection.query(sql, (err, rows) => {
-      if (err) throw err;
-      res
-        .json({
-          users: rows,
-        })
-        .end();
-    });
-  }, 1500);
+  connection.query(sql, (err, rows) => {
+    if (err) throw err;
+    res
+      .json({
+        users: rows,
+      })
+      .end();
+  });
 });
 
 app.delete("/admin/delete/user/:id", (req, res) => {
-  setTimeout((_) => {
-    const { id } = req.params;
+  const { id } = req.params;
 
-    const sql = `
+  const sql = `
         DELETE 
         FROM users 
         WHERE id = ? AND role != 'admin'
         `;
 
-    connection.query(sql, [id], (err, result) => {
-      if (err) throw err;
-      const deleted = result.affectedRows;
-      if (!deleted) {
-        res
-          .status(422)
-          .json({
-            message: {
-              type: "info",
-              title: "Users",
-              text: `The user is an administrator and cannot be deleted or the user does not exist`,
-            },
-          })
-          .end();
-        return;
-      }
+  connection.query(sql, [id], (err, result) => {
+    if (err) throw err;
+    const deleted = result.affectedRows;
+    if (!deleted) {
       res
+        .status(422)
         .json({
           message: {
-            type: "success",
+            type: "info",
             title: "Users",
-            text: `User deleted successfully`,
+            text: `The user is an administrator and cannot be deleted or the user does not exist`,
           },
         })
         .end();
-    });
-  }, 1500);
+      return;
+    }
+    res
+      .json({
+        message: {
+          type: "success",
+          title: "Users",
+          text: `User deleted successfully`,
+        },
+      })
+      .end();
+  });
 });
 
 app.get("/admin/edit/user/:id", (req, res) => {
-  setTimeout((_) => {
-    if (!checkUserIsAuthorized(req, res, ["admin"])) {
-      return;
-    }
+  if (!checkUserIsAuthorized(req, res, ["admin"])) {
+    return;
+  }
 
-    const { id } = req.params;
-    const sql = `
+  const { id } = req.params;
+  const sql = `
         SELECT id, name, email, role
         FROM users
         WHERE id = ?
         `;
-    connection.query(sql, [id], (err, rows) => {
+  connection.query(sql, [id], (err, rows) => {
+    if (err) throw err;
+    if (!rows.length) {
+      res
+        .status(404)
+        .json({
+          message: {
+            type: "info",
+            title: "Users",
+            text: `User not found`,
+          },
+        })
+        .end();
+      return;
+    }
+    res
+      .json({
+        user: rows[0],
+      })
+      .end();
+  });
+});
+
+app.put("/admin/update/user/:id", (req, res) => {
+  const { id } = req.params;
+  const { name, email, role, password } = req.body;
+
+  if (!password) {
+    const sql = `
+            UPDATE users
+            SET name = ?, email = ?, role = ?
+            WHERE id = ?
+            `;
+
+    connection.query(sql, [name, email, role, id], (err, result) => {
       if (err) throw err;
-      if (!rows.length) {
+      const updated = result.affectedRows;
+      if (!updated) {
         res
           .status(404)
           .json({
@@ -279,26 +303,25 @@ app.get("/admin/edit/user/:id", (req, res) => {
       }
       res
         .json({
-          user: rows[0],
+          message: {
+            type: "success",
+            title: "Users",
+            text: `User successfully updated`,
+          },
         })
         .end();
     });
-  }, 1500);
-});
+  } else {
+    const sql = `
+                UPDATE users
+                SET name = ?, email = ?, role = ?, password = ?
+                WHERE id = ?
+                `;
 
-app.put("/admin/update/user/:id", (req, res) => {
-  setTimeout((_) => {
-    const { id } = req.params;
-    const { name, email, role, password } = req.body;
-
-    if (!password) {
-      const sql = `
-            UPDATE users
-            SET name = ?, email = ?, role = ?
-            WHERE id = ?
-            `;
-
-      connection.query(sql, [name, email, role, id], (err, result) => {
+    connection.query(
+      sql,
+      [name, email, role, md5(password), id],
+      (err, result) => {
         if (err) throw err;
         const updated = result.affectedRows;
         if (!updated) {
@@ -323,100 +346,61 @@ app.put("/admin/update/user/:id", (req, res) => {
             },
           })
           .end();
-      });
-    } else {
-      const sql = `
-                UPDATE users
-                SET name = ?, email = ?, role = ?, password = ?
-                WHERE id = ?
-                `;
-
-      connection.query(
-        sql,
-        [name, email, role, md5(password), id],
-        (err, result) => {
-          if (err) throw err;
-          const updated = result.affectedRows;
-          if (!updated) {
-            res
-              .status(404)
-              .json({
-                message: {
-                  type: "info",
-                  title: "Users",
-                  text: `User not found`,
-                },
-              })
-              .end();
-            return;
-          }
-          res
-            .json({
-              message: {
-                type: "success",
-                title: "Users",
-                text: `User successfully updated`,
-              },
-            })
-            .end();
-        }
-      );
-    }
-  }, 1500);
+      }
+    );
+  }
 });
 
 app.post("/login", (req, res) => {
-  setTimeout((_) => {
-    const { email, password } = req.body;
-    const session = md5(uuidv4());
+  const { email, password } = req.body;
+  const session = md5(uuidv4());
 
-    const sql = `
+  const sql = `
             UPDATE users
             SET session = ?
             WHERE email = ? AND password = ?
         `;
 
-    connection.query(sql, [session, email, md5(password)], (err, result) => {
-      if (err) throw err;
-      const logged = result.affectedRows;
-      if (!logged) {
-        res
-          .status(401)
-          .json({
-            message: {
-              type: "error",
-              title: "Login failed",
-              text: `Invalid login data`,
-            },
-          })
-          .end();
-        return;
-      }
-      const sql = `
+  connection.query(sql, [session, email, md5(password)], (err, result) => {
+    if (err) throw err;
+    const logged = result.affectedRows;
+    if (!logged) {
+      res
+        .status(401)
+        .json({
+          message: {
+            type: "error",
+            title: "Login failed",
+            text: `Invalid login data`,
+          },
+        })
+        .end();
+      return;
+    }
+    const sql = `
             SELECT id, name, email, role
             FROM users
             WHERE email = ? AND password = ?
         `;
-      connection.query(sql, [email, md5(password)], (err, rows) => {
-        if (err) throw err;
-        res.cookie("book-session", session, {
-          maxAge: 1000 * 60 * 60 * 24,
-          httpOnly: true,
-        });
-        res
-          .json({
-            message: {
-              type: "success",
-              title: `Hello, ${rows?.[0]?.name}!`,
-              text: `You have successfully logged in`,
-            },
-            session,
-            user: rows?.[0],
-          })
-          .end();
+    connection.query(sql, [email, md5(password)], (err, rows) => {
+      if (err) throw err;
+      res.cookie("book-session", session, {
+        maxAge: 1000 * 60 * 60 * 24,
+        httpOnly: true,
       });
+      res
+        .json({
+          message: {
+            type: "success",
+            title: `Hello, ${rows?.[0]?.name}!`,
+            text: `You have successfully logged in`,
+          },
+          session,
+          user: rows?.[0],
+        })
+        .end();
     });
-  }, 1500);
+  });
 });
 
 app.post("/register", (req, res) => {
@@ -472,43 +456,41 @@ app.post("/register", (req, res) => {
 });
 
 app.post("/logout", (req, res) => {
-  setTimeout((_) => {
-    const session = req.cookies["book-session"];
+  const session = req.cookies["book-session"];
 
-    const sql = `
+  const sql = `
                 UPDATE users
                 SET session = NULL
                 WHERE session = ?
             `;
 
-    connection.query(sql, [session], (err, result) => {
-      if (err) throw err;
-      const logged = result.affectedRows;
-      if (!logged) {
-        res
-          .status(401)
-          .json({
-            message: {
-              type: "error",
-              title: "Logout failed",
-              text: `Invalid login data`,
-            },
-          })
-          .end();
-        return;
-      }
-      res.clearCookie("book-session");
+  connection.query(sql, [session], (err, result) => {
+    if (err) throw err;
+    const logged = result.affectedRows;
+    if (!logged) {
       res
+        .status(401)
         .json({
           message: {
-            type: "success",
-            title: `Disconnected`,
-            text: `You have successfully logged out`,
+            type: "error",
+            title: "Logout failed",
+            text: `Invalid login data`,
           },
         })
         .end();
-    });
-  }, 1500);
+      return;
+    }
+    res.clearCookie("book-session");
+    res
+      .json({
+        message: {
+          type: "success",
+          title: `Disconnected`,
+          text: `You have successfully logged out`,
+        },
+      })
+      .end();
+  });
 });
 
 app.get("/web/types", (req, res) => {
@@ -752,8 +734,8 @@ app.put("/admin/update/post/:id", (req, res) => {
           .json({
             message: {
               type: "info",
-              title: "Straipsniai",
-              text: `Straipsnis nerastas`,
+              title: "Posts",
+              text: `Post does not exist`,
             },
           })
           .end();
@@ -763,8 +745,8 @@ app.put("/admin/update/post/:id", (req, res) => {
         .json({
           message: {
             type: "success",
-            title: "Straipsniai",
-            text: `Straipsnis sėkmingai atnaujintas`,
+            title: "Posts",
+            text: `Posts successfully updated. `,
           },
         })
         .end();
